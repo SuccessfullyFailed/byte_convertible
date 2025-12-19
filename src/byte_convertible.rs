@@ -102,22 +102,22 @@ impl ByteConvertible for String {
 
 	/// Represent the datatype as bytes.
 	fn as_bytes(&self) -> Vec<u8> {
-		self.chars().map(|c| c as u8).collect::<Vec<u8>>().as_bytes()
+		String::as_bytes(&self).to_vec()
 	}
 
 	/// Create the datatype from bytes.
 	fn from_bytes(bytes:&[u8]) -> Option<Self> {
-		Vec::<u8>::from_bytes(bytes).map(|chars| chars.into_iter().map(|char| char as char).collect::<String>())
+		Some(String::from_utf8_lossy(bytes).to_string())
 	}
 
 	/// Create the value from a mutable list of bytes. Consumes the bytes used for the value.
 	fn from_consume_bytes(bytes:&mut Vec<u8>) -> Option<Self> {
-		Vec::<u8>::from_consume_bytes(bytes).map(|chars| chars.into_iter().map(|char| char as char).collect::<String>())
+		Self::from_bytes(&bytes.drain(..Self::bytes_size(bytes)).collect::<Vec<u8>>())
 	}
 
 	/// Get the size in bytes of the type.
 	fn bytes_size(source_bytes:&[u8]) -> usize {
-		Vec::<u8>::bytes_size(source_bytes)
+		source_bytes.iter().position(|byte| *byte == 0).unwrap_or(source_bytes.len())
 	}
 }
 
